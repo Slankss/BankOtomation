@@ -73,13 +73,32 @@ hesap(30, 103, 'TR010030000003000000030', 30, 4500).
 
 
 
-havale(Gonderen,Gonderilen,Miktar) :-   hesap(Gonderen,GonderenBankaNo,_,_,Bakiye),
-                                        hesap(Gonderilen,GonderilenBankaNo,_,_,_),
+havale(Gonderen,Gonderilen,Miktar) :-   (hesap(Gonderen,GonderenBankaNo,_,_,Bakiye) -> true;
 
-                                        write(GonderenBankaNo),
+                                         write("Gönderen No hatalı!"),
+                                         fail
+                                        ),
 
-                                        Miktar =< Bakiye,
-                                        GonderenBankaNo =:= GonderilenBankaNo,
+                                        (hesap(Gonderilen,GonderilenBankaNo,_,_,_) -> true;
+
+                                          write("Gönderilen No hatalı!"),
+                                          fail
+                                        ),
+                      
+                                        
+
+
+                                        ( Miktar =< Bakiye -> true;
+
+                                          write("Bakiye yetersiz!"),
+                                          fail
+                                        ),
+
+                                        (GonderenBankaNo =:= GonderilenBankaNo -> true;
+
+                                          write("Havale işlemi sadece aynı bankalar arasında yapılabilir!"),
+                                          fail
+                                        ),
                                         
                                 
                                         write(Gonderilen), write(" No'lu hesaba "),
