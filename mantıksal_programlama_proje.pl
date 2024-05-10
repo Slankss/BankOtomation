@@ -1,6 +1,7 @@
 :- dynamic banka/2.
 :- dynamic havale/3.
 :- dynamic hesap/5.
+:- dynamic rectract/1.
 
 banka(101,'Ziraat Bankası').
 banka(102,'İş Bankası').
@@ -71,15 +72,25 @@ hesap(29, 105, 'TR010050000002900000029', 29, 500).
 hesap(30, 103, 'TR010030000003000000030', 30, 4500).
 
 
+musteriBilgi(MusteriNo) :-  musteri(MusteriNo,Tc,Ad,Soyad,Cinsiyet),
+                            hesap(HesapNo,BankaNo,Iban,MusteriNo,Bakiye),
+                            banka(BankaNo,BankaIsmi),
 
-
-havale(Gonderen,Gonderilen,Miktar) :-   (hesap(Gonderen,GonderenBankaNo,_,_,Bakiye) -> true;
+                            write("Ad Soyad: "), write(Ad), write(" "), write(Soyad),
+                            write("\nMüşteri TC: "), write(Tc),
+                            write("\nCinsiyet: "), write(Cinsiyet),
+                            write("\nHesap Numarası: "),write(HesapNo),
+                            write("\nBanka: "), write(BankaIsmi), 
+                            write("\nIban: "), write(Iban),
+                            write("\nBakiye: "), write(Bakiye).
+                            
+havale(Gonderen,Gonderilen,Miktar) :-   (hesap(Gonderen,GonderenBankaNo,GonderenIban,GonderenMusteriNo,GonderenBakiye) -> true;
 
                                          write("Gönderen No hatalı!"),
                                          fail
                                         ),
 
-                                        (hesap(Gonderilen,GonderilenBankaNo,_,_,_) -> true;
+                                        (hesap(Gonderilen,GonderilenBankaNo,GonderilenIban,GonderilenMusteriNo,GonderilenBakiye) -> true;
 
                                           write("Gönderilen No hatalı!"),
                                           fail
@@ -88,7 +99,7 @@ havale(Gonderen,Gonderilen,Miktar) :-   (hesap(Gonderen,GonderenBankaNo,_,_,Baki
                                         
 
 
-                                        ( Miktar =< Bakiye -> true;
+                                        ( Miktar =< GonderenBakiye -> true;
 
                                           write("Bakiye yetersiz!"),
                                           fail
@@ -100,6 +111,14 @@ havale(Gonderen,Gonderilen,Miktar) :-   (hesap(Gonderen,GonderenBankaNo,_,_,Baki
                                           fail
                                         ),
                                         
+                                        GonderenBakiye1 is GonderenBakiye - Miktar,
+                                        GonderilenBakiye1 is GonderilenBakiye + Miktar,
+                                        
+                                        retract(hesap(Gonderen, GonderenBankaNo, GonderenIban, GonderenMusteriNo, GonderenBakiye)),
+                                        assert(hesap(Gonderen, GonderenBankaNo, GonderenIban, GonderenMusteriNo, GonderenBakiye1)),
+                                        retract(hesap(Gonderilen, GonderilenBankaNo, GonderilenIban, GonderilenMusteriNo, GonderilenBakiye)),
+                                        assert(hesap(Gonderilen, GonderilenBankaNo, GonderilenIban, GonderilenMusteriNo, GonderilenBakiye1)),
+
                                 
                                         write(Gonderilen), write(" No'lu hesaba "),
                                         write(Miktar), write(" TL "),
